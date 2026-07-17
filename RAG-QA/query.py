@@ -39,7 +39,7 @@ retriever = vectorstore.as_retriever(
     search_kwargs={"k": 5}
 )
 
-# ── Memory ────────────────────────────────────────────────────────────
+# ── Memory ───────────────────
 memory = ConversationBufferWindowMemory(
     k=5,
     memory_key="chat_history",
@@ -47,7 +47,7 @@ memory = ConversationBufferWindowMemory(
     output_key="answer"
 )
 
-# ── Citation prompt ───────────────────────────────────────────────────
+# ── Citation prompt ──────────
 
 qa_prompt = PromptTemplate(
     input_variables=["context", "question"],
