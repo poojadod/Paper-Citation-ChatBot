@@ -8,7 +8,7 @@ from app.main import app          # import your FastAPI app
 client = TestClient(app)          # a fake client that can call your endpoints
 
 
-def done():
+def test_health_returns_ok():
     response = client.get("/health")          # call GET /health
     assert response.status_code == 200        # HTTP success
     assert response.json() == {"status": "ok"}  # exact body we expect
