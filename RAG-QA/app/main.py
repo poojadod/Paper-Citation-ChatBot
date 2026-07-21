@@ -8,7 +8,19 @@ from app.rag import answer_question
 from app.ingest_core import ingest_pdf
 from app.store import get_client, COLLECTION
 
-app = FastAPI()
+
+from contextlib import asynccontextmanager
+from app.sqs_consumer import start_consumer
+
+
+
+@asynccontextmanager
+async def lifespan(app):
+    start_consumer()      # launch the SQS consumer on startup
+    yield
+
+app = FastAPI(lifespan=lifespan)     # ← replace your existing app = FastAPI()
+
 
 
 class QueryRequest(BaseModel):
