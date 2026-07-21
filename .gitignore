@@ -13,3 +13,15 @@ RAG-QA/chroma_db/
 
 # OS
 .DS_Store
+
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+infra/*.auto.tfvars
+
+
+RUNBOOK.md

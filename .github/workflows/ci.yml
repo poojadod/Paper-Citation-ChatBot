@@ -56,3 +56,38 @@ jobs:
       - name: Stop the container
         if: always()
         run: docker rm -f rag
+
+
+  # ── Job 3: build image → push to ECR → redeploy ECS (main only) ──
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build                            # only after test + build pass
+    if: github.ref == 'refs/heads/main'     # deploy only on main, not PRs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            us-east-1
+
+      - name: Log in to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin 386089921957.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build & push image
+        run: |
+          docker build --platform linux/amd64 \
+            -t 386089921957.dkr.ecr.us-east-1.amazonaws.com/rag-qa:latest RAG-QA
+          docker push 386089921957.dkr.ecr.us-east-1.amazonaws.com/rag-qa:latest
+
+      - name: Redeploy ECS service
+        run: |
+          aws ecs update-service \
+            --cluster rag-qa-cluster \
+            --service rag-qa-service \
+            --force-new-deployment \
+            --region us-east-1
