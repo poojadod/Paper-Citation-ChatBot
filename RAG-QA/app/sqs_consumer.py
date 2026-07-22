@@ -78,7 +78,6 @@ def _process_event(s3, body):
         finally:
             os.unlink(tmp_path)
 
-
 def _poll_loop():
     sqs = boto3.client("sqs", region_name=AWS_REGION)
     s3  = boto3.client("s3",  region_name=AWS_REGION)
@@ -94,9 +93,10 @@ def _poll_loop():
                     import traceback
                     print(f"[sqs] error processing message: {repr(e)}")
                     traceback.print_exc()
-
+        except Exception as e:                          # ← THIS LINE was missing
             print(f"[sqs] receive error: {e}")
             time.sleep(5)
+
 
 
 def start_consumer():
