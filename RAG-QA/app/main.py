@@ -11,16 +11,18 @@ from app.store import get_client, COLLECTION
 
 from contextlib import asynccontextmanager
 from app.sqs_consumer import start_consumer
-
+from app.store import get_vectorstore, COLLECTION, get_client   # (get_vectorstore is new here)
+from app.sqs_consumer import start_consumer, start_backfill
 
 
 @asynccontextmanager
 async def lifespan(app):
-    start_consumer()      # launch the SQS consumer on startup
+    get_vectorstore()     # warm once: loads model + creates collection + payload index (avoids thread races)
+    start_backfill()      # ingest existing S3 objects not yet in Qdrant
+    start_consumer()      # listen for new uploads
     yield
 
 app = FastAPI(lifespan=lifespan)     # ← replace your existing app = FastAPI()
-
 
 
 class QueryRequest(BaseModel):

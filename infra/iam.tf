@@ -36,6 +36,11 @@ data "aws_iam_policy_document" "task_permissions" {
     actions   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
     resources = [aws_sqs_queue.ingest.arn]              # consume from the queue
   }
+    statement {
+    actions   = ["s3:ListBucket"]              # to list objects in the bucket
+    resources = [aws_s3_bucket.papers.arn]     # note: the BUCKET arn (no /*)
+  }
+
 }
 
 resource "aws_iam_role_policy" "task_permissions" {

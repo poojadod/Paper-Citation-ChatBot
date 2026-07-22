@@ -7,6 +7,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, PayloadSchemaType, VectorParams
+
 
 # ── Config from environment (same code, different values per environment) ──
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")   # local compose vs Qdrant Cloud
@@ -54,6 +56,17 @@ def get_vectorstore():
                 collection_name=COLLECTION,
                 vectors_config=VectorParams(size=EMBED_DIM, distance=Distance.COSINE),
             )
+        
+        # keyword index on metadata.filename → enables filter/delete by filename (idempotency)
+        try:
+            client.create_payload_index(
+                collection_name=COLLECTION,
+                field_name="metadata.filename",
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
+        except Exception:
+            pass   # already exists → fine
+
         _vectorstore = QdrantVectorStore(
             client=client,
             collection_name=COLLECTION,

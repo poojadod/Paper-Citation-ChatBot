@@ -28,7 +28,9 @@ resource "aws_ecs_task_definition" "app" {
         { name = "QDRANT_URL",     value = var.qdrant_url },
         { name = "QDRANT_API_KEY", value = var.qdrant_api_key },
         { name = "SQS_QUEUE_URL",  value = aws_sqs_queue.ingest.id },   # ← NEW (the consumer reads this)
-        { name = "AWS_REGION",     value = var.aws_region } 
+        { name = "AWS_REGION",     value = var.aws_region }, 
+        { name = "S3_BUCKET", value = aws_s3_bucket.papers.bucket }   # ← for backfill
+
       ]
       logConfiguration = {
         logDriver = "awslogs"
