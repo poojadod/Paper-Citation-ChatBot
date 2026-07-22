@@ -15,6 +15,8 @@ from app.store import get_vectorstore, COLLECTION, get_client   # (get_vectorsto
 from app.sqs_consumer import start_consumer, start_backfill
 
 
+
+
 @asynccontextmanager
 async def lifespan(app):
     try:
