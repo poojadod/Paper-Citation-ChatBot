@@ -17,10 +17,16 @@ from app.sqs_consumer import start_consumer, start_backfill
 
 @asynccontextmanager
 async def lifespan(app):
-    get_vectorstore()     # warm once: loads model + creates collection + payload index (avoids thread races)
-    start_backfill()      # ingest existing S3 objects not yet in Qdrant
-    start_consumer()      # listen for new uploads
+    try:
+        get_vectorstore()      # warm once; OK if Qdrant is unreachable at boot (e.g. CI, transient outage)
+    except Exception as e:
+        print(f"[startup] vectorstore warm-up skipped: {e}")
+    start_backfill()           # skips if S3_BUCKET unset
+    start_consumer()           # disabled if SQS_QUEUE_URL unset
     yield
+
+app = FastAPI(lifespan=lifespan)
+
 
 app = FastAPI(lifespan=lifespan)     # ← replace your existing app = FastAPI()
 
